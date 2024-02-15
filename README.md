@@ -4,4 +4,4 @@ The system is used to manage a database of benzimidazole derivatives with neurot
 # Authors
 1. Gleb V. Pridvorov, Department of Pharmacology and Bioinformatics, Volgograd State Medical University
 2. Olga Y. Mukha, Department of Pharmacology and Bioinformatics, Volgograd State Medical University
-3. Konstantin Y. Kalitin, Department of Pharmacology and Bioinformatics, Volgograd State Medical University, Volgograd, Russian Federation
+3. Konstantin Y. Kalitin, Department of Pharmacology and Bioinformatics, Volgograd State Medical University
