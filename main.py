@@ -1,4 +1,4 @@
-﻿import csv
+import csv
 
 def search(item):
     with open('benzimidazole.csv', encoding='utf-8') as file:
@@ -13,7 +13,7 @@ def advanced_search(field, item): #Инструмент поиска по баз
     with open('benzimidazole.csv', encoding='utf-8') as file:
         rows = csv.DictReader(file) #Генератор списка словарей, каждый элемент - словарь, содержащий значения строки базы, т.е. об одном веществе. Т.к. генератор - потребляет мало памяти, т.е. масштабируется
         for i in rows:
-            if i[field] == item: #Мб заменить на аналог IN
+            if i[field] == item: #Планируется заменить на r-строки для поиска неполных совпадений
                 for j in i.items():
                     print(j[0], ': ', j[1], sep='')
                 print()
@@ -21,36 +21,60 @@ def advanced_search(field, item): #Инструмент поиска по баз
 def insert(item = list()): #Инструмент добавления новых элементов. item - информация, которую добавляем.
     work_list = []
             
-    with open('benzimidazole.csv', encoding='utf-8-sig') as file:
+    with open('benzimidazole.csv', encoding='utf-8-sig') as file: #Записывает информацию из файла в переменную функции в качестве копии. После выхода из функции, копия удаляется
         rows = csv.DictReader(file, delimiter=',')
         for row in rows:
             work_list.append(row)
-        print(len(work_list))
-        print(work_list[0], '\n', work_list[-1])
         file.close()
 
-    with open('benzimidazole.csv', 'w', encoding='utf-8-sig') as file:
-        columns = ['Автор', 'Шифр', 'IUPAC', 'SMILES', 'Молекулярная масса', 'Принадлежность', 'Источник_1', 'Активность_1', 'Величина_1', 'Источник_2', 'Активность_2', 'Величина_2', 'Источник_3', 'Механизм', 'Источник_4']#И здесь, и в файле нужно сделать названия уникальными
+    with open('benzimidazole.csv', 'w', encoding='utf-8-sig') as file: #Добавляет в переменную новую строку, после чего перезаписывает измененную таблицу в файл. Требует внести в новую строку значения всех столбцов. Ищу, как сделать автозамену. Один из кандидатов на переработку - мне не нравится, что файл перезаписывается, но других враиантов я пока не нашел.
+        columns = ['id', 'Автор', 'Шифр', 'IUPAC', 'SMILES', 'Молекулярная масса', 'Принадлежность', 'Источник_1', 'Активность_1', 'Величина_1', 'Источник_2', 'Активность_2', 'Величина_2', 'Источник_3', 'Механизм', 'Источник_4']
         new_item = {k:v for k, v in zip(columns, item)}
-        print(len(work_list))
-        print(work_list[0], '\n', work_list[-1])
         work_list.append(new_item)
-        print(len(work_list))
-        print(work_list[0], '\n', work_list[-1])
         writer = csv.DictWriter(file, fieldnames=columns, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
         writer.writeheader()
-        for row in work_list:                     # запись строк
+        for row in work_list:
             writer.writerow(row)
         file.close()
         print('Информация добавлена')
 
-def change(id, field, new_item): #Пока что менять адресно не получится. нужно что-то вроде уникального id для каждой отдельной строки
-    pass
+def change(code, field=None, new_item=''): #Изменяет значения в строке как адресно - одну конкретную ячейку - так и массово, т.е. всю строку. Если не установлено поле, то меняется вся строка, кроме айди. Внести запрет на замену айди
+    work_list = []
+    columns = ['id', 'Автор', 'Шифр', 'IUPAC', 'SMILES', 'Молекулярная масса', 'Принадлежность', 'Источник_1', 'Активность_1', 'Величина_1', 'Источник_2', 'Активность_2', 'Величина_2', 'Источник_3', 'Механизм', 'Источник_4']
+    
+    with open('benzimidazole.csv', encoding='utf-8-sig') as file: #Аналогично функции добавления
+        rows = csv.DictReader(file, delimiter=',')
+        for row in rows:
+            work_list.append(row)
+        file.close()
 
-def delete(id, field): #Пока что удалять адресно не получится. нужно что-то вроде уникального id для каждой отдельной строки
-    pass
+    with open('benzimidazole.csv', 'w', encoding='utf-8-sig') as file: #Сперва заменяем значение поля/строки в переменной, потом - аналогично добавлению
+        if field:
+            for i in work_list:
+                if i[id] == code:
+                    i[field] = new_item
+        else:
+            for i in work_list:
+                if i[id] == code:
+                    i = new_item
 
-task = input('Выберите номер задачи:\n\t1. Найти вещество\n\t2. Найти вещество (продвинутый поиск)\n\t3. Добавить вещество\n\t4. Изменить значение (пока не релизовано)\n\t5. Удалить значение (пока не реализовано)\n')
+        writer = csv.DictWriter(file, fieldnames=columns, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
+        for row in work_list:
+            writer.writerow(row)
+        file.close()
+        print('Информация изменена')
+
+def delete(code, field=None): #Work in progress. Если не установлено поле, то удаляется вся строка. Придумать, как смещать оставшиеся строки наверх
+    work_list = []
+            
+    with open('benzimidazole.csv', encoding='utf-8-sig') as file:
+        rows = csv.DictReader(file, delimiter=',')
+        for row in rows:
+            work_list.append(row)
+        file.close()
+
+task = input('Выберите номер задачи:\n\t1. Найти вещество\n\t2. Найти вещество (продвинутый поиск)\n\t3. Добавить вещество\n\t4. Изменить значение\n\t5. Удалить значение (пока не реализовано)\n')
 
 if task == '1':
     search_item = input('Введите искомое значение: ')
@@ -62,6 +86,9 @@ if task == '2':
     advanced_search(search_field, search_item)
 
 if task == '3':
-    print('Введите через запятую значения полей в следующем порядке: Автор, Шифр, IUPAC, SMILES, Молекулярная масса, Принадлежность, Источник, Активность, Величина, Источник, Активность, Величина, Источник, Механизм, Источник.\n Если значение отсутствует или неизвестно, напечатайте на его месте пробел')
+    print('Введите через запятую значения полей в следующем порядке: id, Автор, Шифр, IUPAC, SMILES, Молекулярная масса, Принадлежность, Источник, Активность, Величина, Источник, Активность, Величина, Источник, Механизм, Источник.\nЕсли значение отсутствует или неизвестно, напечатайте на его месте пробел')#Возможно, стоит сделать ввод в несколько строк
     new_str = input().split(', ')
     insert(new_str)
+    
+if task == '4': #Work in progress
+    print('Введите id строки, которую планируете изменять, и название поля, если намерены менять конкретно его. В случае если поле не указано, будет изменена вся запись, соответственно, необходимо указать параметры для всех полей')
