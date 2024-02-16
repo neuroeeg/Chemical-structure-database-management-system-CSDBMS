@@ -65,7 +65,7 @@ def change(code, field=None, new_item=''): #Изменяет значения в
         file.close()
         print('Информация изменена')
 
-def delete(code, field=None): #Work in progress. Если не установлено поле, то удаляется вся строка. Придумать, как смещать оставшиеся строки наверх
+def delete(code, field): #Если не установлено поле, то удаляется вся строка, т.е. заменяется на None
     work_list = []
             
     with open('benzimidazole.csv', encoding='utf-8-sig') as file:
@@ -73,6 +73,26 @@ def delete(code, field=None): #Work in progress. Если не установл�
         for row in rows:
             work_list.append(row)
         file.close()
+
+    with open('benzimidazole.csv', 'w', encoding='utf-8-sig') as file:
+        columns = ['id', 'Автор', 'Шифр', 'IUPAC', 'SMILES', 'Молекулярная масса', 'Принадлежность', 'Источник_1', 'Активность_1', 'Величина_1', 'Источник_2', 'Активность_2', 'Величина_2', 'Источник_3', 'Механизм', 'Источник_4']
+
+        if field:
+            for i in work_list:
+                if i['id'] == code:
+                    i[field] = None
+        else:
+            new_item = {k:None for k in columns}
+            for i in work_list:
+                if i['id'] == code:
+                    i = new_item
+
+        writer = csv.DictWriter(file, fieldnames=columns, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
+        for row in work_list:
+            writer.writerow(row)
+        file.close()
+        print('Информация удалена')
 
 task = input('Выберите номер задачи:\n\t1. Найти вещество\n\t2. Найти вещество (продвинутый поиск)\n\t3. Добавить вещество\n\t4. Изменить значение\n\t5. Удалить значение (пока не реализовано)\n')
 
