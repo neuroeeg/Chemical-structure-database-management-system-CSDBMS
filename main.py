@@ -1,4 +1,19 @@
 import csv
+import time
+import random
+import sys
+from pathlib import Path
+import seaborn as sns
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt 
+from rdkit import Chem
+from rdkit import DataStructs
+from rdkit.ML.Cluster import Butina
+from rdkit.Chem import Draw
+from rdkit.Chem import rdFingerprintGenerator
+from rdkit.Chem.Draw import SimilarityMaps
 
 def search(item):
     with open('benzimidazole.csv', encoding='utf-8') as file:
@@ -94,7 +109,41 @@ def delete(code, field): #Если не установлено поле, то у
         file.close()
         print('Информация удалена')
 
-task = input('Выберите номер задачи:\n\t1. Найти вещество\n\t2. Найти вещество (продвинутый поиск)\n\t3. Добавить вещество\n\t4. Изменить значение\n\t5. Удалить значение (пока не реализовано)\n')
+def tanimoto(SMILES):
+
+    np.set_printoptions(threshold=sys.maxsize)
+
+    # Загружаем query молекулу из SMILES
+    print('После выполнения скрипта в папке с программой будет создан файл sims_vs_all.txt, в котором будут сохранены полученные результаты.\nВ каждой строке будет указан шифр вещества, с которым проводится сравнение, и коэффициент Танимото.\nЧем ближе коэффициент к 1, тем выше степень сходства.')
+    query = Chem.MolFromSmiles(SMILES)
+    try:
+        fp1 = Chem.RDKFingerprint(query)
+    except:
+        print('Ошибка во введенном SMILES')
+
+    # Загружаем данные из CSV файла
+    ligands_df = pd.read_csv("benzimidazole.csv" , index_col=0)
+
+    molecules = []
+
+    for _, row in ligands_df.iterrows():
+        # Извлекаем SMILES и шифр из строки и записываем их в общий список
+        smiles = row["SMILES"]
+        shifr = row["ShIFR"]
+        molecules.append([shifr, Chem.MolFromSmiles(smiles)])
+
+    #Проходимся по списку из шифров и SMILESов. Для каждой структуры рассчитываем сходство с образцом
+    for mol in molecules:
+        with open('sims_vs_all.txt', 'a') as outfile:
+            try:
+                fp2 = Chem.RDKFingerprint(mol[1])
+                sim = DataStructs.TanimotoSimilarity(fp1,fp2)
+                print(f'Степень сходства структуры вашего SMILES с веществом {mol[0]} составляет {sim}', file=outfile)
+            except:
+                print('На этой строке произошла ошибка. Проверьте правильность введенного вами SMILES. Если вы в нем уверены, значит, ошибка в SMILES этой строки.', file=outfile)
+
+
+task = input('Выберите номер задачи:\n\t1. Найти вещество\n\t2. Найти вещество (продвинутый поиск)\n\t3. Добавить вещество\n\t4. Изменить значение\n\t5. Удалить значение\n\t6. Рассчитать сходство Танимото\n')
 
 if task == '1':
     search_item = input('Введите искомое значение: ')
@@ -120,3 +169,7 @@ if task == '5':
     id = input('Введите id строки, с которой планируете работать: ')
     field = input('Введите название поля, если намерены удалить конкретно его. Если собираетесь удалить все поле, введите None ')
     delete(id, field)
+
+if task == '6':
+    SMILES = input('Введите SMILES соединения, для которого вы хотите рассчитать сходство Танимото относительно веществ, находящихся в базе: ')
+    tanimoto(SMILES)
