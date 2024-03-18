@@ -1,5 +1,6 @@
 # Chemical structure DB management system (CSDBMS)
-The system is used to manage a database of benzimidazole derivatives with neurotropic and psychotropic properties (certificate No. 2023624590)
+The system is used to manage a database of benzimidazole derivatives with neurotropic and psychotropic properties (certificate No. 2023624590).
+
 Данное ПО предназначено для управления записями (их добавления, изменения и удаления) базы данных, содержащей сведения о бензимидазолах с нейро- и психотропной активностью. Кроме того, данная программа предоставляет инструменты для поиска соединений, а также анализа сходства пользовательских структур с веществами, внесенными в БД.
 Анализ сходства структур выполняется на основании расчета сходства Танимото в сравнении с внесенными в БД SMILES. 
 # Authors
